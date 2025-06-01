@@ -1,9 +1,17 @@
 ## Нереляционные базы данных и MongoDB
 ### Введение в MongoDB
 * Подготовка:
-    * Установка докер образа:
+    * Пришлось немного изменить user.json и posts.json, так как они не были валидными json файлами, точнее NDJSON(одна JSON-запись на строку), а не JSON массивом. Для этой цели написан скрипт fix_json_file.py. Для mongoimport это важно, потому что он требует корректный JSON массив.
+    * Использованы скрипты fix_json_file.py и users_fixed.py
+    * Установка докер образа и импорт данных:
         * 1) docker run --name skillbox-mongodb -d mongo:4.4 
         * 2) docker exec -it skillbox-mongodb mongo
+        * 3) docker cp posts_fixed.json skillbox-mongodb:/tmp
+        * 4) docker exec -it skillbox-mongodb mongoimport --db skdb --collection posts --file /tmp/posts_fixed.json --jsonArray
+        * 5) docker cp users_fixed.json skillbox-mongodb:/tmp
+        * 6) docker exec -it skillbox-mongodb mongoimport --db skdb --collection users --file /tmp/users_fixed.json --jsonArray
+
+     
 1. Задача:
 
 ```txt
