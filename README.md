@@ -364,7 +364,35 @@ nHlM_ooDoglBe
 >
 
 ```
-
+* Как вариант, можно написать вот так:
+```javascript
+> db.system.js.save({
+...   _id: "shuffle1",
+...   value: function(str) {
+...     // Преобразуем строку в массив символов
+...     let arr = str.split('');
+...
+...     // Сортируем массив случайным образом с помощью Math.random()
+...     for (let i = arr.length - 1; i > 0; i--) {
+...       const j = Math.floor(Math.random() * (i + 1));
+...       const temp = arr[i];
+...       arr[i] = arr[j];
+...       arr[j] = temp;
+...     }
+...
+...     // Преобразуем массив обратно в строку
+...     return arr.join('');
+...   }
+... });
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 0 })
+> const shuffle2 = db.loadServerScripts();
+> print(shuffle2("Hello_World"));
+_rlWdoleolH
+> const shuffleCode3 = db.system.js.findOne({ _id: "shuffle1" }).value;
+> const shuffle3 = eval('(' + shuffleCode3.code + ')');
+> print(shuffle3("Hello_World"));
+ll_lWerdHoo
+```
 ###  Введение Redis
 
 * Подготовка:

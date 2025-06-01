@@ -1,0 +1,79 @@
+1)  db.system.js.save({_id: "sum", value: function(x,y){return x+y}});
+WriteResult({ "nMatched" : 0, "nUpserted" : 1, "nModified" : 0, "_id" : "sum" })
+
+2)> db.system.js.updateOne(
+...   { _id: "sum" },
+...   { $set: { value: function(x, y){ return x + y } } },
+...   { upsert: true }
+... )
+{ "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+
+3) > db.system.js.find({ _id: "sum" }).pretty()
+{ "_id" : "sum", "value" : { "code" : "function(x, y){ return x + y }" } }
+>
+
+4) > const sumFunc = db.loadServerScripts(); // Загружает все функции из system.js
+> sum(3, 4); // 7
+7
+>>
+> db.version();
+4.4.29
+>
+
+5) > db.system.js.save({_id: "sum2", value: function(x,y){return x+y}});
+WriteResult({ "nMatched" : 0, "nUpserted" : 1, "nModified" : 0, "_id" : "sum2" })
+6) > db.eval("return sum2(2,20)");
+WARNING: db.eval is deprecated
+uncaught exception: Error: {
+        "ok" : 0,
+        "errmsg" : "no such command: '$eval'",
+        "code" : 59,
+        "codeName" : "CommandNotFound"
+} :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+DB.prototype.eval@src/mongo/shell/db.js:693:15
+@(shell):1:1
+
+
+7) > const sumFunc2 = db.loadServerScripts();
+8) > sum2(2,20);
+22
+
+
+9) db.skdb.find({$where: "sum2(this.x, this.y)==6"});
+
+express - фреймворк node.js
+
+Концепция MEAN / MERN / MIARD и её аналогия с LAMP (Linux, Apache, MySQL, PHP) — это распространённый способ структурировать стек разработки.
+------------------------------------------
+Стандартные JavaScript-стеки
+🔹 MEAN
+MongoDB
+
+Express
+
+Angular
+
+Node.js
+
+🔹 MERN
+MongoDB
+
+Express
+
+React
+
+Node.js
+
+🔹 MEVN
+MongoDB
+
+Express
+
+Vue.js
+
+Node.js
+-----------------------------------------------------
+10) 
+
+ 
