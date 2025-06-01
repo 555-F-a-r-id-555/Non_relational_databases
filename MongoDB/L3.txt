@@ -1,0 +1,456 @@
+1) db.articles.find({"comment": {"$elemMatch": {"_id": ObjectId("683b9fbfc147fab13d11a931")}}},{"comment.$": 1}).explain();
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.articles",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "comment" : {
+                                "$elemMatch" : {
+                                        "_id" : {
+                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                        }
+                                }
+                        }
+                },
+                "queryHash" : "A4B480E5",
+                "planCacheKey" : "3031BB5C",
+                "winningPlan" : {
+                        "stage" : "PROJECTION_DEFAULT",
+                        "transformBy" : {
+                                "comment.$" : 1
+                        },
+                        "inputStage" : {
+                                "stage" : "COLLSCAN",
+                                "filter" : {
+                                        "comment" : {
+                                                "$elemMatch" : {
+                                                        "_id" : {
+                                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                                        }
+                                                }
+                                        }
+                                },
+                                "direction" : "forward"
+                        }
+                },
+                "rejectedPlans" : [ ]
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+
+2) > use skdb
+switched to db skdb
+3) > show collections
+articles
+misc
+posts
+users
+4) > db.articles.find({"comment": {"$elemMatch": {"_id": ObjectId("683b9fbfc147fab13d11a931")}}},{"comment.$": 1}).explain("executionStats");
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.articles",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "comment" : {
+                                "$elemMatch" : {
+                                        "_id" : {
+                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                        }
+                                }
+                        }
+                },
+                "winningPlan" : {
+                        "stage" : "PROJECTION_DEFAULT",
+                        "transformBy" : {
+                                "comment.$" : 1
+                        },
+                        "inputStage" : {
+                                "stage" : "COLLSCAN",
+                                "filter" : {
+                                        "comment" : {
+                                                "$elemMatch" : {
+                                                        "_id" : {
+                                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                                        }
+                                                }
+                                        }
+                                },
+                                "direction" : "forward"
+                        }
+                },
+                "rejectedPlans" : [ ]
+        },
+        "executionStats" : {
+                "executionSuccess" : true,
+                "nReturned" : 1,
+                "executionTimeMillis" : 0,
+                "totalKeysExamined" : 0,
+                "totalDocsExamined" : 1,
+                "executionStages" : {
+                        "stage" : "PROJECTION_DEFAULT",
+                        "nReturned" : 1,
+                        "executionTimeMillisEstimate" : 0,
+                        "works" : 3,
+                        "advanced" : 1,
+                        "needTime" : 1,
+                        "needYield" : 0,
+                        "saveState" : 0,
+                        "restoreState" : 0,
+                        "isEOF" : 1,
+                        "transformBy" : {
+                                "comment.$" : 1
+                        },
+                        "inputStage" : {
+                                "stage" : "COLLSCAN",
+                                "filter" : {
+                                        "comment" : {
+                                                "$elemMatch" : {
+                                                        "_id" : {
+                                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                                        }
+                                                }
+                                        }
+                                },
+                                "nReturned" : 1,
+                                "executionTimeMillisEstimate" : 0,
+                                "works" : 3,
+                                "advanced" : 1,
+                                "needTime" : 1,
+                                "needYield" : 0,
+                                "saveState" : 0,
+                                "restoreState" : 0,
+                                "isEOF" : 1,
+                                "direction" : "forward",
+                                "docsExamined" : 1
+                        }
+                }
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+
+5) > db.articles.find(ObjectId("683b9fbfc147fab13d11a933"))
+{ "_id" : ObjectId("683b9fbfc147fab13d11a933"), "title" : "Good news everyone", "text" : "Everyone is ok", "comment" : [ { "_id" : ObjectId("683b9fbfc147fab13d11a931"), "author" : "byuko@example.com", "message" : "good thinks!" }, { "_id" : ObjectId("683b9fbfc147fab13d11a932"), "author" : "mmickey@example.info", "message" : "thank you" } ] }
+6) > db.articles.find(ObjectId("683b9fbfc147fab13d11a933")).explain()
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.articles",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "_id" : {
+                                "$eq" : ObjectId("683b9fbfc147fab13d11a933")
+                        }
+                },
+                "queryHash" : "A300CFDE",
+                "planCacheKey" : "A2B33459",
+                "winningPlan" : {
+                        "stage" : "IDHACK"
+                },
+                "rejectedPlans" : [ ]
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+>
+
+7) > db.articles.find({"comment": {"$elemMatch": {"_id": ObjectId("683b9fbfc147fab13d11a931")}}},{"comment.$": 1});
+{ "_id" : ObjectId("683b9fbfc147fab13d11a933"), "comment" : [ { "_id" : ObjectId("683b9fbfc147fab13d11a931"), "author" : "byuko@example.com", "message" : "good thinks!" } ] }
+8) > db.articles.find({"comment": {"$elemMatch": {"_id": ObjectId("683b9fbfc147fab13d11a931")}}},{"comment.$": 1}).explain();
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.articles",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "comment" : {
+                                "$elemMatch" : {
+                                        "_id" : {
+                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                        }
+                                }
+                        }
+                },
+                "queryHash" : "A4B480E5",
+                "planCacheKey" : "3031BB5C",
+                "winningPlan" : {
+                        "stage" : "PROJECTION_DEFAULT",
+                        "transformBy" : {
+                                "comment.$" : 1
+                        },
+                        "inputStage" : {
+                                "stage" : "COLLSCAN",
+                                "filter" : {
+                                        "comment" : {
+                                                "$elemMatch" : {
+                                                        "_id" : {
+                                                                "$eq" : ObjectId("683b9fbfc147fab13d11a931")
+                                                        }
+                                                }
+                                        }
+                                },
+                                "direction" : "forward"
+                        }
+                },
+                "rejectedPlans" : [ ]
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+
+9) > db.posts.find("author": "denvoy@example.ru");
+uncaught exception: SyntaxError: missing ) after argument list :
+@(shell):1:22
+> db.posts.find({"author": "denvoy@example.ru"});
+{ "_id" : ObjectId("6835056aff8dffb49b8a7d00"), "author" : "denvoy@example.ru", "creation_date" : ISODate("2021-03-16T00:00:00Z"), "topics" : [ "had", "ran" ], "score" : 4407, "status" : "published", "message" : "to might will here things knee alice have and they on lying the thought trials down among she though go the to been and of feelings and she rabbit you i as how capital in" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7d06"), "author" : "denvoy@example.ru", "creation_date" : ISODate("2021-02-13T00:00:00Z"), "topics" : [ "tired", "sitting", "tired" ], "score" : 2872, "status" : "published", "message" : "wasn voice not what indeed that my the i after same cried of she it let my as to this on things you the my had meaning somewhere these hastily come mouse box a said getting looked pigeon game she may old at hunting think trial puzzling the rate in it the brass dig but minutes now advice to the it make certainly pinched to he it to all you the and her mad nothing these voices can with silence at this surprised if the one whiting in and what she repeat i thank about of and it and i beautiful having butter plan of who get the hoarsely thought his his beautiful mock be and comfits stalk it his first a life said bread with this right agree footman drew much together it as mouse had till nice the and and moment and wide round call but yer it took here why it they i tried that she the try time do ringlets it at large the and know is alice you white hatter before tea that the question the or an march going must eyes more i its learnt fanning quiet go march was master when neither your i of just a said be to i distraction seemed at to recognised saying more eyes t having said re have be please don cry such beheaded it go up" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7d4b"), "author" : "denvoy@example.ru", "creation_date" : ISODate("2021-06-24T00:00:00Z"), "topics" : [ "to", "once", "at" ], "score" : 1607, "status" : "published", "message" : "waiting gryphon made and but she time throwing sobbing in any one minute my that said of drowned minutes great the but find rabbit all oh would she got the getting her said i to within at to slates suddenly cheshire sit do all when regular to and the white said that as i sudden and for up can considering in others wonder said said muchness by was do all minute permitted good be crumbs but up queen such she tea be down but a her is hunting others a and used where if said up" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7d82"), "author" : "denvoy@example.ru", "creation_date" : ISODate("2021-06-09T00:00:00Z"), "topics" : [ "remarkable", "of" ], "score" : 357, "status" : "published", "message" : "panting which in everything to repeat king to i get first question dear a to words still doubt head that trembling yawning about would things you turning perhaps once two they large cat had thought the act s ran what to than when that and anything absurd queen twinkling said the she a a out little out bowed keep would and king nose dinah white that joys to said and wish cook she with filled of no tried said a and end slowly what the remember for into straight something saying himself to the under feet i as well that caterpillar the nice" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7dd9"), "author" : "denvoy@example.ru", "creation_date" : ISODate("2020-09-21T00:00:00Z"), "topics" : [ "by", "or", "book", "have" ], "score" : 436, "status" : "published", "message" : "in may which it and said on writhing the as terrier you an said the so of of years me been and been twinkling on please of you and pig is at little do run her where louder you the dinah he she waving my little year m to the in duchess large said and they just heads but the you meant like glad box began on figure tried one sadly i follows you place till of to take couldn they did remarks all suddenly if soldiers to all soon that was ten smoking and they snappishly saying mouse feet thing pack i hatter capering question gryphon will though the a beds white nothing a alice no to ladder another nose down hard their at of but alice was who this i on one might and round pace alice give try the so be he i should out window doing them go the she un the answer a we the i s door what who one splashed that better alice and you march too boots why and were alice introduce out if in no at said now use where alice sleepy mouse the to very in like what them tried the curious said bathing be who up the they your how" }
+10) > db.posts.find({"author": "denvoy@example.ru"}).explain();
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.posts",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "author" : {
+                                "$eq" : "denvoy@example.ru"
+                        }
+                },
+                "queryHash" : "1B9AB0D9",
+                "planCacheKey" : "1B9AB0D9",
+                "winningPlan" : {
+                        "stage" : "COLLSCAN",
+                        "filter" : {
+                                "author" : {
+                                        "$eq" : "denvoy@example.ru"
+                                }
+                        },
+                        "direction" : "forward"
+                },
+                "rejectedPlans" : [ ]
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+
+11) > db.posts.createIndex({"author": 1});
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+>
+
+12) > db.posts.find({"author": "denvoy@example.ru"}).explain();
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.posts",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "author" : {
+                                "$eq" : "denvoy@example.ru"
+                        }
+                },
+                "queryHash" : "1B9AB0D9",
+                "planCacheKey" : "678F4E1F",
+                "winningPlan" : {
+                        "stage" : "FETCH",
+                        "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "keyPattern" : {
+                                        "author" : 1
+                                },
+                                "indexName" : "author_1",
+                                "isMultiKey" : false,
+                                "multiKeyPaths" : {
+                                        "author" : [ ]
+                                },
+                                "isUnique" : false,
+                                "isSparse" : false,
+                                "isPartial" : false,
+                                "indexVersion" : 2,
+                                "direction" : "forward",
+                                "indexBounds" : {
+                                        "author" : [
+                                                "[\"denvoy@example.ru\", \"denvoy@example.ru\"]"
+                                        ]
+                                }
+                        }
+                },
+                "rejectedPlans" : [ ]
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+
+композитный индекс (compound index) - это индекс, который охватывает несколько полей в коллекции
+13) > db.posts.createIndex({author: 1, score: 1});
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 2,
+        "numIndexesAfter" : 3,
+        "ok" : 1
+}
+>
+
+14) > db.posts.find({"author": "denvoy@example.ru"}).explain();
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.posts",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "author" : {
+                                "$eq" : "denvoy@example.ru"
+                        }
+                },
+                "queryHash" : "1B9AB0D9",
+                "planCacheKey" : "F96D21CD",
+                "winningPlan" : {
+                        "stage" : "FETCH",
+                        "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "keyPattern" : {
+                                        "author" : 1
+                                },
+                                "indexName" : "author_1",
+                                "isMultiKey" : false,
+                                "multiKeyPaths" : {
+                                        "author" : [ ]
+                                },
+                                "isUnique" : false,
+                                "isSparse" : false,
+                                "isPartial" : false,
+                                "indexVersion" : 2,
+                                "direction" : "forward",
+                                "indexBounds" : {
+                                        "author" : [
+                                                "[\"denvoy@example.ru\", \"denvoy@example.ru\"]"
+                                        ]
+                                }
+                        }
+                },
+                "rejectedPlans" : [
+                        {
+                                "stage" : "FETCH",
+                                "inputStage" : {
+                                        "stage" : "IXSCAN",
+                                        "keyPattern" : {
+                                                "author" : 1,
+                                                "score" : 1
+                                        },
+                                        "indexName" : "author_1_score_1",
+                                        "isMultiKey" : false,
+                                        "multiKeyPaths" : {
+                                                "author" : [ ],
+                                                "score" : [ ]
+                                        },
+                                        "isUnique" : false,
+                                        "isSparse" : false,
+                                        "isPartial" : false,
+                                        "indexVersion" : 2,
+                                        "direction" : "forward",
+                                        "indexBounds" : {
+                                                "author" : [
+                                                        "[\"denvoy@example.ru\", \"denvoy@example.ru\"]"
+                                                ],
+                                                "score" : [
+                                                        "[MinKey, MaxKey]"
+                                                ]
+                                        }
+                                }
+                        }
+                ]
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+>
+
+Геолокация
+15) > db.places.save({locs: [[55.5, 42.3], [-74, 44.74], {lng: 55.5, lat: 42.3}]});
+WriteResult({ "nInserted" : 1 })
+16) > db.places.createIndex({"locs": "2d"});
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+>
+17) > db.posts.createIndex({text: "text"});
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 3,
+        "numIndexesAfter" : 4,
+        "ok" : 1
+}
+>
+
+18) > db.collection.createIndex({ author: "hashed"});
+{
+        "createdCollectionAutomatically" : true,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+>
+19) > db.users.createIndex({ "first_name": 1, "last_name": 1}, {unique: true});
+{
+        "ok" : 0,
+        "errmsg" : "Index with name: first_name_1_last_name_1 already exists with different options",
+        "code" : 85,
+        "codeName" : "IndexOptionsConflict"
+}
+
+20) > db.eventlog.createIndex({ "lastModifiedDate": 1}, {expireAfterSeconds: 3600});
+{
+        "createdCollectionAutomatically" : true,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+>
+21) 

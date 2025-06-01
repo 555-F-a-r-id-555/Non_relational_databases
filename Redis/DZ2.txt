@@ -1,0 +1,350 @@
+Нереляционные базы данных и MongoDB
+Урок 3. Введение Redis
+Задание 1
+
+Цель практической работы:
+Научиться выполнять простые запросы в Redis.
+
+Что нужно сделать
+Напишите последовательность команд для Redis:
+1.Создайте ключ index со значением “index precalculated content”.
+2.Проверьте, есть ли ключ index в БД.
+3.Узнайте, сколько ещё времени будет существовать ключ index.
+4.Отмените запланированное удаление ключа index.
+
+Что оценивается
+Верная последовательность команд.
+
+Ответ:
+127.0.0.1:6379> set index "index precalculated content" ex 220
+OK
+127.0.0.1:6379> get index
+"index precalculated content"
+127.0.0.1:6379> ttl index
+(integer) 201
+127.0.0.1:6379> persist index
+(integer) 1
+127.0.0.1:6379> ttl index
+(integer) -1
+127.0.0.1:6379> keys *
+1) "visitors:main"
+2) "hello"
+3) "index"
+
+
+
+Задание 2
+
+Цель практической работы:
+Научиться работать со структурами данных в Redis.
+
+Что нужно сделать
+Напишите последовательность команд для Redis:
+Создайте в Redis структуру данных с ключом ratings для хранения следующих значений рейтингов технологий: mysql — 10, postgresql — 20, mongodb — 30, redis — 40.
+По этому же ключу увеличьте значение рейтинга mysql на 15.
+Удалите из структуры элемент с максимальным значением.
+Выведите место в рейтинге для mysql.
+
+Что оценивается
+Верная последовательность команд.
+
+Ответ:
+1) 127.0.0.1:6379> hset ratings mysql -10 postgresql -20 redis -40
+(integer) 3
+2) 127.0.0.1:6379> hgetall ratings
+1) "mysql"
+2) "-10"
+3) "postgresql"
+4) "-20"
+5) "redis"
+6) "-40"
+3) 127.0.0.1:6379> hincrby ratings mysql 15
+(integer) 5
+4) 127.0.0.1:6379> hget ratings mysql
+"5"
+----------------------------------------------------------
+5) 127.0.0.1:6379> hdel ratings mysql postgresql mongodb
+(integer) 2
+6) 127.0.0.1:6379> hgetall ratings
+1) "redis"
+2) "-40"
+7) 127.0.0.1:6379> hdel ratings redis
+(integer) 1
+8) 127.0.0.1:6379> hgetall ratings
+(empty array)
+---------------------------------------------------------------
+9) hset ratings mysql 10 postgresql 20 mongodb 30 redis 40
+10) 127.0.0.1:6379> hset ratings mysql 10 postgresql 20 mongodb 30 redis 40
+(integer) 4
+11) 127.0.0.1:6379> hgetall ratings
+1) "mysql"
+2) "10"
+3) "postgresql"
+4) "20"
+5) "mongodb"
+6) "30"
+7) "redis"
+8) "40"
+12) 127.0.0.1:6379> hincrby ratings mysql 15
+(integer) 25
+13) 127.0.0.1:6379> hgetall ratings
+1) "mysql"
+2) "25"
+3) "postgresql"
+4) "20"
+5) "mongodb"
+6) "30"
+7) "redis"
+8) "40"
+14) HDEL ratings redis
+15) HGETALL ratings
+16) 127.0.0.1:6379> hget ratings mysql
+------------------------------------------------------------------------------------
+1) ZADD ratings 10 mysql 20 postgresql 30 mongodb 40 redis
+1.1) 127.0.0.1:6379> ZRANGE ratings2 0 -1
+1) "mysql"
+2) "postgresql"
+3) "mongodb"
+4) "redis"
+2) ZSCORE ratings2 mysql
+3) ZINCRBY ratings 15 mysql
+4) ZSCORE ratings2 mysql
+3) ZPOPMAX ratings
+4) ZREVRANK ratings mysql
+-------------------------------------------------------------------------
+
+
+1) ZADD ratings 10 mysql 20 postgresql 30 mongodb 40 redis
+2) ZINCRBY ratings 15 mysql
+3) ZSCORE ratings2 mysql
+4) ZPOPMAX ratings
+5) ZREVRANK ratings mysql
+6) ZREVRANGE ratings 0 -1 WITHSCORES COMMENT 'Показать весь рейтинг по убыванию'
+-----------------------------------------------------------------------------------
+127.0.0.1:6379> ZADD ratings 10 mysql 20 postgresql 30 mongodb 40 redis
+(integer) 4
+
+127.0.0.1:6379> ZINCRBY ratings 15 mysql
+"25"
+
+127.0.0.1:6379> ZPOPMAX ratings
+1) "redis"
+2) "40"
+
+127.0.0.1:6379> ZREVRANK ratings mysql
+(integer) 1
+
+127.0.0.1:6379> ZREVRANGE ratings2 0 -1 WITHSCORES                COMMENT 'Показать весь рейтинг по убыванию'
+
+Задание 3
+
+Цель практической работы:
+Научиться работать с механизмом Pub/Sub в Redis.
+
+Что нужно сделать
+Напишите две команды для СУБД Redis:
+1) Подпишитесь на все события, опубликованные на каналах, начинающихся с events.
+2) Опубликуйте сообщение на канале events101 с текстом “Hello there”.
+
+Что оценивается
+Верная последовательность команд.
+
+1. 127.0.0.1:6379> PSUBSCRIBE events*
+1) "psubscribe"
+2) "events*"
+3) (integer) 1
+1) "pmessage"
+2) "events*"
+3) "events101"
+4) "Hello there"
+2. 127.0.0.1:6379> PUBLISH events101 "Hello there"
+(integer) 1
+
+
+Задание 4
+
+Цель практической работы:
+Научиться работать с хранимыми функциями в Redis.
+
+Что нужно сделать
+Сохраните в Redis функцию, которая принимает ключ и значение и сохраняет под указанным ключом квадратный корень от значения.
+
+Что оценивается
+Верный запрос.
+
+Ответ: 
+
+
+  
+  redis.call('set', KEYS[1], ARGV[1]*ARGV[1])
+
+1. 127.0.0.1:6379> script load "redis.call('set', KEYS[1], ARGV[1]*ARGV[1])"
+"971e1a12ebd2719d0a0b0ee2f1c0aac90361f85c"
+2. 127.0.0.1:6379> evalsha 971e1a12ebd2719d0a0b0ee2f1c0aac90361f85c 1 10 20
+(nil)
+3. 127.0.0.1:6379> get 10
+"400"
+---------------------------------------------------------------------
+
+127.0.0.1:6379> script load "redis.call('set', KEYS[1], ARGV[1]*ARGV[1])"
+"971e1a12ebd2719d0a0b0ee2f1c0aac90361f85c"
+127.0.0.1:6379> evalsha 971e1a12ebd2719d0a0b0ee2f1c0aac90361f85c 1 10 20
+(nil)
+127.0.0.1:6379> get 10
+"400"
+-----------------------------------------------------------------------------
+redis.call('set', KEYS[1], math.sqrt(tonumber(ARGV[1])))
+-----------------------------------------------------------------------------
+v_1
+
+1) 127.0.0.1:6379> script load "redis.call('set', KEYS[1], math.sqrt(tonumber(ARGV[1])))"
+"799f63c53d34aaf6d427666319aa7084196921ae"
+2) 127.0.0.1:6379> evalsha 799f63c53d34aaf6d427666319aa7084196921ae 1 result 49
+(nil)
+3) 127.0.0.1:6379> get result
+"7.0"
+-------------------------------------------------------------------------------
+v_1_1
+
+1) 127.0.0.1:6379> script load "for i=1, #KEYS do redis.call('set', KEYS[1], math.sqrt(tonumber(ARGV[1]))) end"
+"f1483ed0a2a6fb54bc2735147e2e7e1af7f06f64"
+2) 127.0.0.1:6379> evalsha f1483ed0a2a6fb54bc2735147e2e7e1af7f06f64 2 result1 result2 25 81
+(nil)
+3) 127.0.0.1:6379> get result1
+"5"
+4) 127.0.0.1:6379> get result2
+(nil)
+-------------------------------------------------------------------------------------------
+v_2_new для Redis 7+ и 8+ требует "метаданные библиотеки" при использовании FUNCTION LOAD
+
+1) FUNCTION LOAD "#!lua name=mathLib\nredis.register_function('save_sqrt', function(keys, args) local key = keys[1] local value = tonumber(args[1]) local sqrt_result = math.sqrt(value) redis.call('set', key, sqrt_result) end)"
+2) FCALL save_sqrt 1 mykey 144
+3) GET mykey
+4) FUNCTION DELETE mathLib
+
+
+---------------------------------------------------------
+v_2
+
+FUNCTION CREATE mathLib LUA '
+redis.register_function("save_sqrt", function(keys, args)
+    local key = keys[1]
+    local value = tonumber(args[1])
+    local sqrt_result = math.sqrt(value)
+    redis.call("set", key, sqrt_result)
+end)
+'
+FCALL save_sqrt 1 result 49
+
+GET result
+
+FUNCTION DELETE mathLib
+-----------------------------------------------------------------------------------------------
+
+FUNCTION CREATE mathLib LUA 'redis.register_function("save_sqrt", function(keys, args) local key = keys[1] local value = tonumber(args[1]) local sqrt_result = math.sqrt(value) redis.call("set", key, sqrt_result) end)'
+----------------------------------------------------
+
+
+
+
+127.0.0.1:6379> FUNCTION CREATE mathLib LUA 'redis.register_function("save_sqrt", function(keys, args) local key = keys[1] local value = tonumber(args[1]) local sqrt_result = math.sqrt(value) redis.call("set", key, sqrt_result) end)'
+(error) ERR unknown subcommand 'CREATE'. Try FUNCTION HELP.
+127.0.0.1:6379>
+127.0.0.1:6379>
+127.0.0.1:6379> INFO server
+# Server
+redis_version:8.0.1
+redis_git_sha1:00000000
+redis_git_dirty:1
+redis_build_id:5f0dca946420e042
+redis_mode:standalone
+os:Linux 5.15.167.4-microsoft-standard-WSL2 x86_64
+arch_bits:64
+monotonic_clock:POSIX clock_gettime
+multiplexing_api:epoll
+atomicvar_api:c11-builtin
+gcc_version:12.2.0
+process_id:1
+process_supervised:no
+run_id:db0e8ee8b06c1fe0211cee493997894bb195427d
+tcp_port:6379
+server_time_usec:1748581789611268
+uptime_in_seconds:11383
+uptime_in_days:0
+hz:10
+configured_hz:10
+lru_clock:3751325
+executable:/data/redis-server
+config_file:
+io_threads_active:0
+listener0:name=tcp,bind=*,bind=-::*,port=6379
+127.0.0.1:6379>
+127.0.0.1:6379>
+127.0.0.1:6379> FUNCTION HELP
+ 1) FUNCTION <subcommand> [<arg> [value] [opt] ...]. Subcommands are:
+ 2) LOAD [REPLACE] <FUNCTION CODE>
+ 3)     Create a new library with the given library name and code.
+ 4) DELETE <LIBRARY NAME>
+ 5)     Delete the given library.
+ 6) LIST [LIBRARYNAME PATTERN] [WITHCODE]
+ 7)     Return general information on all the libraries:
+ 8)     * Library name
+ 9)     * The engine used to run the Library
+10)     * Functions list
+11)     * Library code (if WITHCODE is given)
+12)     It also possible to get only function that matches a pattern using LIBRARYNAME argument.
+13) STATS
+14)     Return information about the current function running:
+15)     * Function name
+16)     * Command used to run the function
+17)     * Duration in MS that the function is running
+18)     If no function is running, return nil
+19)     In addition, returns a list of available engines.
+20) KILL
+21)     Kill the current running function.
+22) FLUSH [ASYNC|SYNC]
+23)     Delete all the libraries.
+24)     When called without the optional mode argument, the behavior is determined by the
+25)     lazyfree-lazy-user-flush configuration directive. Valid modes are:
+26)     * ASYNC: Asynchronously flush the libraries.
+27)     * SYNC: Synchronously flush the libraries.
+28) DUMP
+29)     Return a serialized payload representing the current libraries, can be restored using FUNCTION RESTORE command
+30) RESTORE <PAYLOAD> [FLUSH|APPEND|REPLACE]
+31)     Restore the libraries represented by the given payload, it is possible to give a restore policy to
+32)     control how to handle existing libraries (default APPEND):
+33)     * FLUSH: delete all existing libraries.
+34)     * APPEND: appends the restored libraries to the existing libraries. On collision, abort.
+35)     * REPLACE: appends the restored libraries to the existing libraries, On collision, replace the old
+36)       libraries with the new libraries (notice that even on this option there is a chance of failure
+37)       in case of functions name collision with another library).
+38) HELP
+39)     Print this help.
+127.0.0.1:6379>
+127.0.0.1:6379>
+127.0.0.1:6379> FUNCTION LOAD "redis.register_function('save_sqrt', function(keys, args) local key = keys[1] local value = tonumber(args[1]) local sqrt_result = math.sqrt(value) redis.call('set', key, sqrt_result) end)"
+(error) ERR Missing library metadata
+127.0.0.1:6379>
+127.0.0.1:6379>
+127.0.0.1:6379>
+127.0.0.1:6379> FUNCTION LOAD "#!lua name=mathLib\nredis.register_function('save_sqrt', function(keys, args) local key = keys[1] local value = tonumber(args[1]) local sqrt_result = math.sqrt(value) redis.call('set', key, sqrt_result) end)"
+"mathLib"
+127.0.0.1:6379>
+127.0.0.1:6379> FCALL save_sqrt 1 mykey 144
+(nil)
+127.0.0.1:6379> GET mykey
+"12"
+127.0.0.1:6379> FUNCTION DELETE mathLib
+OK
+
+---------------------------------------------------------------------
+v_2
+
+1) FUNCTION LOAD "#!lua name=mathLib\nredis.register_function('save_sqrt', function(keys, args) local key = keys[1] local value = tonumber(args[1]) local sqrt_result = math.sqrt(value) redis.call('set', key, sqrt_result) end)"
+2) FCALL save_sqrt 1 mykey 144
+3) GET mykey
+4) FUNCTION DELETE mathLib
+
+--------------------------------------------------
+
+

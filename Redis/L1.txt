@@ -1,0 +1,58 @@
+1) docker run -d --name redis -p 6379:6379 redis:8.0
+2) docker exec -it redis redis-cli - подключение
+3) redis-cli -h 127.0.0.1 -p 6379 - локально
+4)ping - pong
+5) echo hello - "hello"
+6) set hello world - "world"
+7) get hello - "world"
+8) set user:10:name Ivan - OK
+9) get user:10:name - Ivan
+10) get user:19:name - (nil)
+11)  exists user:10:name - (integer) 1
+12) exists user:10:name get user - (integer) 1
+13) 127.0.0.1:6379> exists user:10:name get hello - (integer) 2
+14) 127.0.0.1:6379> del hello
+(integer) 1
+15) 127.0.0.1:6379> exists hello
+(integer) 0
+16) 127.0.0.1:6379> set hello world ex 60
+OK
+17)127.0.0.1:6379> get hello
+"world"
+18) 127.0.0.1:6379> ttl hello
+(integer) 12
+19) 127.0.0.1:6379> ttl hello
+(integer) -2
+20) 127.0.0.1:6379> set hello world ex 60
+OK
+21) 127.0.0.1:6379> persist hello
+(integer) 1
+22) 127.0.0.1:6379> get hello
+"world"
+23) 127.0.0.1:6379> append hello "!!!"
+(integer) 8
+24) 127.0.0.1:6379> get hello
+"world!!!"
+25) 127.0.0.1:6379> set visitors:index 0
+OK
+26) 127.0.0.1:6379> incr visitors:index
+(integer) 1
+27) 127.0.0.1:6379> incr visitors:index
+(integer) 2
+28) 127.0.0.1:6379> incr visitors:index
+(integer) 3
+29) 127.0.0.1:6379> decr visitors:index
+(integer) 2
+30) 127.0.0.1:6379> decr visitors:index
+(integer) 1
+31) 127.0.0.1:6379> get visitors:index
+"1"
+32) 127.0.0.1:6379> rename visitors:index visitors:main
+OK
+33) 127.0.0.1:6379> KEYS *
+1) "visitors:main"
+2) "hello"
+3) "user:10:name"
+
+
+

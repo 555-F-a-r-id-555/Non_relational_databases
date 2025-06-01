@@ -1,0 +1,96 @@
+Resdis - распределенная СУБД
+Хранимые Процедуры - язык Lua - простой скриптовый язык
+1) 127.0.0.1:6379> eval "redis.call('set','user:'..KEYS[1]..'name', ARGV[1])" 1 10 Ivan
+(nil)
+2) 127.0.0.1:6379> get user:10:name
+"Ivan"
+3) 127.0.0.1:6379> script load "redis.call('set','user:'..KEYS[1]..'name', ARGV[1])"
+"d1ee6cb4087dbb998ad07820590c0809ae750b50"
+4) 127.0.0.1:6379> evalsha d1ee6cb4087dbb998ad07820590c0809ae750b50 2 11 12 Oleg Igor
+(nil)
+5) 127.0.0.1:6379> get user:11:name
+(nil)
+6) 127.0.0.1:6379> get user:12:name
+(nil)
+7) 127.0.0.1:6379> get user:10:name
+"Ivan"
+8) 127.0.0.1:6379> get user:11name
+"Oleg"
+-------------------------------------------------------------------------------------------
+9) 127.0.0.1:6379> script load "redis.call('set','user:'..KEYS[1]..':name', ARGV[1])"
+"2a9c4810c91b1c7d72f93362ea9631f8c6890e11"
+10) 127.0.0.1:6379> evalsha 2a9c4810c91b1c7d72f93362ea9631f8c6890e11 2 11 12 Oleg Igor
+(nil)
+11) 127.0.0.1:6379> get user:11:name
+"Oleg"
+12) 127.0.0.1:6379> get user:12:name
+(nil)
+-----------------------------------------------------------------------------------------------
+13) Скрипт на Lua 
+for i = 1, #KEYS do
+  redis.call('set', 'user:' .. KEYS[i] .. ':name', ARGV[i])
+end
+
+14) Тоже самое но в Redis
+127.0.0.1:6379> script load "for i=1, #KEYS do redis.call('set','user:'..KEYS[i]..':name',ARGV[i]) end"
+"07322f0bb7bdb9ce19042b9c7a11b550647ed932"
+15) 127.0.0.1:6379> evalsha 07322f0bb7bdb9ce19042b9c7a11b550647ed932 2 11 12 Oleg Igor
+(nil)
+16) 127.0.0.1:6379> get user:11:name
+"Oleg"
+17)127.0.0.1:6379> get user:12:name
+"Igor"
+----------------------------------------------------------------------------------------------------------
+18) 127.0.0.1:6379> script load "for i=1, #KEYS do redis.call('set','user:'..KEYS[i]..':name',ARGV[i]) end"
+"07322f0bb7bdb9ce19042b9c7a11b550647ed932"
+19) 127.0.0.1:6379> evalsha 07322f0bb7bdb9ce19042b9c7a11b550647ed932 2 101 102 Oleg Igor
+(nil)
+20) 127.0.0.1:6379> get user:101:name
+"Oleg"
+21) 127.0.0.1:6379> get user:102:name
+"Igor"
+22) 127.0.0.1:6379> evalsha 07322f0bb7bdb9ce19042b9c7a11b550647ed932 3 20 21 22 Anton Olga Victor
+(nil)
+23) 127.0.0.1:6379> get user:20:name
+"Anton"
+24) 127.0.0.1:6379> get user:21:name
+"Olga"
+25) 127.0.0.1:6379> get user:22:name
+"Victor"
+--------------------------------------------------------------------------------------------------------
+транзакции
+26) 127.0.0.1:6379> multi
+OK
+127.0.0.1:6379(TX)> 
+27) 127.0.0.1:6379(TX)> set hello world
+QUEUED
+28) 127.0.0.1:6379(TX)> exec
+1) OK
+29) 127.0.0.1:6379> get hello
+"world"
+-----------
+30) 127.0.0.1:6379> multi
+OK
+31) 127.0.0.1:6379(TX)> set hello2 world2
+QUEUED
+32) 127.0.0.1:6379(TX)>
+33) PS P:\Flash_Copy\MongoDb\Radis> docker exec -it redis redis-cli
+34) 127.0.0.1:6379> get hello2
+(nil)
+---------------------
+35) 127.0.0.1:6379> multi
+OK
+36) 127.0.0.1:6379(TX)> set hello3 world3
+QUEUED
+37) 127.0.0.1:6379(TX)> discard
+OK
+38) 127.0.0.1:6379> get hello3
+(nil)
+39) 
+В Redis нет save-ponts, нужно писать их на Lua
+
+
+
+
+
+

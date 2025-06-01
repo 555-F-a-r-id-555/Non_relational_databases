@@ -1,0 +1,114 @@
+Aggregation framework - аналитические функции
+1) > db.users.aggregate({$match: {"_id": /example.info/}});
+{ "_id" : "dozay@example.info", "first_name" : "Dore", "last_name" : "Ozay", "registration_date" : ISODate("2021-07-01T00:00:00Z"), "birth_date" : ISODate("1990-07-24T00:00:00Z"), "visits" : 969, "top_tags" : { "would" : 8, "and" : 6, "pictures" : 6, "be" : 8, "nor" : 1 }, "karma" : -46 }
+{ "_id" : "etxp@example.info", "first_name" : "Elsi", "last_name" : "Txp", "registration_date" : ISODate("2020-01-02T00:00:00Z"), "birth_date" : ISODate("1975-05-18T00:00:00Z"), "visits" : 472, "top_tags" : { "nor" : 8, "a" : 10, "her" : 9, "as" : 3, "have" : 9 }, "karma" : 120 }
+{ "_id" : "jcolleen@example.info", "first_name" : "Jovan", "last_name" : "Colleen", "registration_date" : ISODate("2020-02-25T00:00:00Z"), "birth_date" : ISODate("1919-05-15T00:00:00Z"), "visits" : 329, "top_tags" : { "watch" : 1, "remarkable" : 3, "rabbit" : 3, "at" : 5, "as" : 2, "a" : 4 }, "karma" : 106 }
+{ "_id" : "kdelphine@example.info", "first_name" : "Katya", "last_name" : "Delphine", "registration_date" : ISODate("2020-03-18T00:00:00Z"), "birth_date" : ISODate("2003-04-14T00:00:00Z"), "visits" : 188, "top_tags" : { "bank" : 1, "seemed" : 4 }, "karma" : 97 }
+{ "_id" : "lluc@example.info", "first_name" : "Leny", "last_name" : "Luc", "registration_date" : ISODate("2021-03-11T00:00:00Z"), "birth_date" : ISODate("1995-09-05T00:00:00Z"), "visits" : 495, "top_tags" : { "a" : 3, "her" : 9, "book" : 3 }, "karma" : -33 }
+{ "_id" : "mmickey@example.info", "first_name" : "Mamie", "last_name" : "Mickey", "registration_date" : ISODate("2020-01-12T00:00:00Z"), "birth_date" : ISODate("1960-07-11T00:00:00Z"), "visits" : 805, "top_tags" : { "a" : 5, "book" : 5, "trouble" : 8 }, "karma" : 80 }
+{ "_id" : "oray@example.info", "first_name" : "Oorschot", "last_name" : "Ray", "registration_date" : ISODate("2021-04-23T00:00:00Z"), "birth_date" : ISODate("1968-07-21T00:00:00Z"), "visits" : 907, "top_tags" : { "of" : 8, "whether" : 9, "pictures" : 8, "the" : 10, "it" : 8, "but" : 7 }, "karma" : -3 }
+>
+
+2) > db.users.aggregate([{$match: {"_id": /example.info/}}, {$project: {karma: "karma", year: "$birth_date"}}]);
+{ "_id" : "dozay@example.info", "karma" : "karma", "year" : ISODate("1990-07-24T00:00:00Z") }
+{ "_id" : "etxp@example.info", "karma" : "karma", "year" : ISODate("1975-05-18T00:00:00Z") }
+{ "_id" : "jcolleen@example.info", "karma" : "karma", "year" : ISODate("1919-05-15T00:00:00Z") }
+{ "_id" : "kdelphine@example.info", "karma" : "karma", "year" : ISODate("2003-04-14T00:00:00Z") }
+{ "_id" : "lluc@example.info", "karma" : "karma", "year" : ISODate("1995-09-05T00:00:00Z") }
+{ "_id" : "mmickey@example.info", "karma" : "karma", "year" : ISODate("1960-07-11T00:00:00Z") }
+{ "_id" : "oray@example.info", "karma" : "karma", "year" : ISODate("1968-07-21T00:00:00Z") }
+>
+
+3) > db.users.aggregate([{$match: {"_id": /example.info/}}, {$project: {karma: "$karma", year: "$birth_date"}}]);
+{ "_id" : "dozay@example.info", "karma" : -46, "year" : ISODate("1990-07-24T00:00:00Z") }
+{ "_id" : "etxp@example.info", "karma" : 120, "year" : ISODate("1975-05-18T00:00:00Z") }
+{ "_id" : "jcolleen@example.info", "karma" : 106, "year" : ISODate("1919-05-15T00:00:00Z") }
+{ "_id" : "kdelphine@example.info", "karma" : 97, "year" : ISODate("2003-04-14T00:00:00Z") }
+{ "_id" : "lluc@example.info", "karma" : -33, "year" : ISODate("1995-09-05T00:00:00Z") }
+{ "_id" : "mmickey@example.info", "karma" : 80, "year" : ISODate("1960-07-11T00:00:00Z") }
+{ "_id" : "oray@example.info", "karma" : -3, "year" : ISODate("1968-07-21T00:00:00Z") }
+>
+
+4) > db.users.aggregate([{$match: {"_id": /example.info/}}, {$project: {karma: "$karma", year: "$birth_date"}}, {$group: {_id: "$year", avg_karma: {$avg: "$karma"}}}]);
+{ "_id" : ISODate("2003-04-14T00:00:00Z"), "avg_karma" : 97 }
+{ "_id" : ISODate("1968-07-21T00:00:00Z"), "avg_karma" : -3 }
+{ "_id" : ISODate("1995-09-05T00:00:00Z"), "avg_karma" : -33 }
+{ "_id" : ISODate("1975-05-18T00:00:00Z"), "avg_karma" : 120 }
+{ "_id" : ISODate("1919-05-15T00:00:00Z"), "avg_karma" : 106 }
+{ "_id" : ISODate("1990-07-24T00:00:00Z"), "avg_karma" : -46 }
+{ "_id" : ISODate("1960-07-11T00:00:00Z"), "avg_karma" : 80 }
+>
+
+5) > db.users.aggregate([{$match: {"_id": /example.info/}}, {$project: {karma: "$karma", year: "$birth_date"}}, {$group: {_id: "$year", avg_karma: {$avg: "karma"}}}]);
+{ "_id" : ISODate("2003-04-14T00:00:00Z"), "avg_karma" : null }
+{ "_id" : ISODate("1968-07-21T00:00:00Z"), "avg_karma" : null }
+{ "_id" : ISODate("1995-09-05T00:00:00Z"), "avg_karma" : null }
+{ "_id" : ISODate("1975-05-18T00:00:00Z"), "avg_karma" : null }
+{ "_id" : ISODate("1919-05-15T00:00:00Z"), "avg_karma" : null }
+{ "_id" : ISODate("1960-07-11T00:00:00Z"), "avg_karma" : null }
+{ "_id" : ISODate("1990-07-24T00:00:00Z"), "avg_karma" : null }
+>
+
+6) > db.posts.aggregate({$unwind: "$topics"}, {$project: {"topic": "$topics"}});
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf3"), "topic" : "oh" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf3"), "topic" : "own" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf3"), "topic" : "having" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf3"), "topic" : "own" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf4"), "topic" : "was" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf4"), "topic" : "ought" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf5"), "topic" : "making" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf5"), "topic" : "oh" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf5"), "topic" : "actually" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf6"), "topic" : "oh" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf6"), "topic" : "and" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf6"), "topic" : "would" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf7"), "topic" : "but" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf7"), "topic" : "of" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf7"), "topic" : "oh" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf7"), "topic" : "getting" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf8"), "topic" : "have" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf8"), "topic" : "be" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf8"), "topic" : "ran" }
+{ "_id" : ObjectId("6835056aff8dffb49b8a7cf8"), "topic" : "once" }
+Type "it" for more
+>
+
+7) > db.posts.aggregate({$unwind: "$topics"}, {$project: {"topic": "$topics"}}, {$group: {_id: "$topic", cnt: {$sum: 1}}});
+
+{ "_id" : "into", "cnt" : 9 }
+{ "_id" : "and", "cnt" : 12 }
+{ "_id" : "pictures", "cnt" : 9 }
+{ "_id" : "whether", "cnt" : 9 }
+{ "_id" : "alice", "cnt" : 13 }
+{ "_id" : "nothing", "cnt" : 4 }
+{ "_id" : "had", "cnt" : 14 }
+{ "_id" : "watch", "cnt" : 11 }
+{ "_id" : "seemed", "cnt" : 8 }
+{ "_id" : "sitting", "cnt" : 9 }
+{ "_id" : "have", "cnt" : 9 }
+{ "_id" : "would", "cnt" : 12 }
+{ "_id" : "by", "cnt" : 11 }
+{ "_id" : "nor", "cnt" : 17 }
+{ "_id" : "oh", "cnt" : 13 }
+{ "_id" : "way", "cnt" : 12 }
+{ "_id" : "tired", "cnt" : 11 }
+{ "_id" : "at", "cnt" : 6 }
+{ "_id" : "feel", "cnt" : 15 }
+{ "_id" : "book", "cnt" : 9 }
+Type "it" for more
+>
+
+8) > db.posts.aggregate({$unwind: "$topics"}, {$project: {"topic": "$topics"}}, {$group: {_id: "$topic", cnt: {$sum: 1}}}, {$sort: {cnt: -1}}, {$limit: 10});
+{ "_id" : "use", "cnt" : 20 }
+{ "_id" : "pink", "cnt" : 19 }
+{ "_id" : "nor", "cnt" : 17 }
+{ "_id" : "having", "cnt" : 17 }
+{ "_id" : "that", "cnt" : 17 }
+{ "_id" : "pleasure", "cnt" : 17 }
+{ "_id" : "down", "cnt" : 17 }
+{ "_id" : "a", "cnt" : 17 }
+{ "_id" : "made", "cnt" : 16 }
+{ "_id" : "hot", "cnt" : 16 }
+>
+
+9) 

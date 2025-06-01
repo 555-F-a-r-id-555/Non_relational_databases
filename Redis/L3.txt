@@ -1,0 +1,121 @@
+паттерн: Publish–subscribe(Издатель — подписчик) - Является расширением шаблона «наблюдатель», 
+в который добавлено описание канала событий (англ. event channel), специально предназначенного для оповещения о событиях
+Шаблон «издатель — подписчик» наряду с близкой ему концепцией очереди сообщений содержится в арсенале средств 
+событийно-ориентированного связующего программного обеспечения большой системы. 
+Большинство систем передачи сообщений поддерживают в своём API как и модель «издатель — подписчик», так и очередь сообщений. 
+Примером такой системы может быть Java Message Service (JMS)
+Этот шаблон обеспечивает большую масштабируемость и более динамичную топологию сети.
+1) 127.0.0.1:6379> SUBSCRIBE chat1
+1) "subscribe"
+2) "chat1"
+3) (integer) 1
+1) "message"
+2) "chat1"
+3) "hello"
+
+2) 127.0.0.1:6379> PUBLISH chat1 hello
+(integer) 1
+3) 127.0.0.1:6379> PUBLISH chat2 hello
+(integer) 0
+4) 127.0.0.1:6379> PSUBSCRIBE chat*
+1) "psubscribe"
+2) "chat*"
+3) (integer) 1
+1) "pmessage"
+2) "chat*"
+3) "chat2"
+4) "hello"
+
+5) 127.0.0.1:6379> PSUBSCRIBE chat*
+1) "psubscribe"
+2) "chat*"
+3) (integer) 1
+1) "pmessage"
+2) "chat*"
+3) "chat2"
+4) "hello"
+1) "pmessage"
+2) "chat*"
+3) "chat1"
+4) "hello"
+
+6) 127.0.0.1:6379> SUBSCRIBE chat1
+1) "subscribe"
+2) "chat1"
+3) (integer) 1
+1) "message"
+2) "chat1"
+3) "hello"
+1) "message"
+2) "chat1"
+3) "hello"
+
+7) 127.0.0.1:6379> PUBLISH chat1 hello22
+(integer) 2
+8) 127.0.0.1:6379> SUBSCRIBE chat1
+1) "subscribe"
+2) "chat1"
+3) (integer) 1
+1) "message"
+2) "chat1"
+3) "hello"
+1) "message"
+2) "chat1"
+3) "hello"
+1) "message"
+2) "chat1"
+3) "hello22"
+
+9) 127.0.0.1:6379> SUBSCRIBE chat1
+1) "subscribe"
+2) "chat1"
+3) (integer) 1
+1) "message"
+2) "chat1"
+3) "hello"
+1) "message"
+2) "chat1"
+3) "hello"
+1) "message"
+2) "chat1"
+3) "hello22"
+
+10) 127.0.0.1:6379> PSUBSCRIBE chat*
+1) "psubscribe"
+2) "chat*"
+3) (integer) 1
+1) "pmessage"
+2) "chat*"
+3) "chat2"
+4) "hello"
+1) "pmessage"
+2) "chat*"
+3) "chat1"
+4) "hello"
+1) "pmessage"
+2) "chat*"
+3) "chat1"
+4) "hello22"
+
+11) 127.0.0.1:6379> PUBSUB channels
+1) "chat1"
+12) 127.0.0.1:6379> PUBSUB NUMPAT
+(integer) 1
+13) 127.0.0.1:6379> PUBSUB NUMSUB chat1
+1) "chat1"
+2) (integer) 1
+14) 127.0.0.1:6379> PUBSUB NUMSUB chat2
+1) "chat2"
+2) (integer) 0
+15) 127.0.0.1:6379> PSUBSCRIBE chat1
+1) "psubscribe"
+2) "chat1"
+3) (integer) 1
+16) 127.0.0.1:6379> SUBSCRIBE chat1
+1) "subscribe"
+2) "chat1"
+3) (integer) 1
+17) 127.0.0.1:6379> PUBSUB NUMSUB chat1
+1) "chat1"
+2) (integer) 2
+18) 

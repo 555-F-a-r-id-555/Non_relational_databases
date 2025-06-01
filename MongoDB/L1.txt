@@ -1,0 +1,41 @@
+1) ls
+2) docker run --name skillbox-mongodb -d mongo
+3) docker run --name skillbox-mongodb -d mongo:3.1
+4) docker exec -it skillbox-mongodb mongo
+5) mongosh mongodb://skillbox-mongodb:27017
+6) mongosh mongodb://localhost:27017
+----------------------------------------------------------------
+работает
+7) docker rm -f skillbox-mongodb  # остановим и удалим текущий контейнер
+8) docker run --name skillbox-mongodb -d mongo:4.4
+9) docker exec -it skillbox-mongodb mongo
+-----------------------------------------------------------------------------
+10) less users.json
+11) less posts.json
+11) docker cp .\posts.json skillbox-mongodb:/tmp
+--------------------------------------------------------------------------------
+12) docker cp .\posts.json skillbox-mongodb:/tmp
+13) docker exec -it skillbox-mongodb mongoimport --db skdb --collection posts --file /tmp/posts.json
+14) docker exec -it skillbox-mongodb mongoimport --db skdb --collection posts --file /tmp/posts.json --jsonArray
+------------------------------------------------------------------------------------------------------------------------
+работает
+15) docker cp posts_fixed.json skillbox-mongodb:/tmp
+16) docker exec -it skillbox-mongodb mongoimport --db skdb --collection posts --file /tmp/posts_fixed.json --jsonArray
+17) docker cp users_fixed.json skillbox-mongodb:/tmp
+18) docker exec -it skillbox-mongodb mongoimport --db skdb --collection users --file /tmp/users_fixed.json --jsonArray
+---------------------------------------------------------------------------------------------------------------------------
+19) docker exec -it skillbox-mongodb mongo
+20) show dbs
+21) use skdb
+22) db
+23) show collections
+24) db.users.find({"_id" : "byuko@example.com"})
+25) db.users.find({"karma" : {$lt: -10}, "first_name": /.*an.*/})
+26) db.users.find({"karma" : {$lt: -10}, "first_name": /.*an.*/}).limit(1)
+27) db.users.updateMany({"karma": {$lt: -10}, "first_name": /.*an.*/}, {$set: {"karma": 0}})
+28) db.users.insert({"first_name": "Test", "karma": 100, "admin": true})
+29) db.users.find({"admin": true})
+30) db.users.insertMany([{"first_name": "Test2", "karma": 100, "admin": true}, {"first_name": "Test3", "karma": 100, "admin": true}])
+31) db.users.find({"admin": true})
+32) db.users.find({"last_name": {$exists: false}})
+33) db.users.remove({"last_name": {$exists: false}})

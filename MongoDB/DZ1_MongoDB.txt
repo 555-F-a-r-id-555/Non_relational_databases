@@ -1,0 +1,584 @@
+Нереляционные базы данных и MongoDB
+Урок 2. Введение в MongoDB
+Задание 1
+
+Цель практической работы:
+Научиться выполнять простые запросы в MongoDB.
+
+Что нужно сделать:
+Из коллекции постов(posts) выберите документы, в которых среди топиков(topics) встречается as, идентификатор автора(author) содержит example.ru, а score больше 100.
+
+Ответ: 
+db.posts.find({
+  topics: "as",
+  author: /example\.ru/,
+  score: { $gt: 100 }
+})
+
+
+
+Задание 2
+
+Цель практической работы:
+Научиться писать запросы с использованием различных структур данных в MongoDB.
+
+Что нужно сделать:
+Одним запросом добавьте два документа к коллекции posts:
+creation_date — текущее время, автор — skbx@example.com, topics должен быть списком из одного элемента mongodb;
+creation_date — 31 декабря 2021 года, автор — skbx@example.ru.
+
+Ответ:
+db.posts.insertMany([
+  {
+    creation_date: new Date(),
+    author: 'skbx@example.com',
+    topics: ['mongodb']
+  },
+  {
+    creation_date: new Date('2021-12-31'),
+    author: 'skbx@example.ru'
+  }
+]);
+
+Ответ:
+db.posts.insertMany([
+  {
+    creation_date: new Date(),
+    author: 'skbx@example.com',
+    topics: ['mongodb']
+  },
+  {
+    creation_date: ISODate('2021-12-31T00:00:00Z'), // Использование ISODate для явного указания формата даты
+    author: 'skbx@example.ru',
+    topics: [] // Добавление поля topics, если оно обязательно в схеме
+  }
+]);
+
+
+
+
+Задание 3
+Цель практической работы:
+Научиться анализировать запросы и создавать индексы в MongoDB.
+
+Что нужно сделать:
+Создайте композитный индекс для коллекции users, в него войдут поля first_name и last_name. Приведите запросы: на создание индекса и на проверку, что индекс используется.
+
+Ответ:
+Создание Копозитного индекса:
+db.users.createIndex({ first_name: 1, last_name: 1 });
+Проверка использования индекса:
+db.users.find({ first_name: "Vinnie", last_name: "Janiya" }).explain("executionStats");
+
+сама коллекция users:
+[
+  {
+    "_id": "vjaniya@example.ru",
+    "first_name": "Vinnie",
+    "last_name": "Janiya",
+    "registration_date": {
+      "$date": "2021-09-11T00:00:00Z"
+    },
+    "birth_date": {
+      "$date": "1909-04-06T00:00:00Z"
+    },
+    "visits": 645,
+    "top_tags": {
+      "was": 9,
+      "as": 1,
+      "alice": 8,
+      "on": 1,
+      "own": 8,
+      "a": 9
+    },
+    "karma": -43
+  },
+  {
+    "_id": "mmickey@example.info",
+    "first_name": "Mamie",
+    "last_name": "Mickey",
+    "registration_date": {
+      "$date": "2020-01-12T00:00:00Z"
+    },
+    "birth_date": {
+      "$date": "1960-07-11T00:00:00Z"
+    },
+    "visits": 805,
+    "top_tags": {
+      "a": 5,
+      "book": 5,
+      "trouble": 8
+    },
+    "karma": 80
+  },
+  {
+    "_id": "lluc@example.info",
+    "first_name": "Leny",
+    "last_name": "Luc",
+    "registration_date": {
+      "$date": "2021-03-11T00:00:00Z"
+    },
+    "birth_date": {
+      "$date": "1995-09-05T00:00:00Z"
+    },
+    "visits": 495,
+    "top_tags": {
+      "a": 3,
+      "her": 9,
+      "book": 3
+    },
+    "karma": -33
+  },
+  {
+    "_id": "aalfred@example.ru",
+    "first_name": "Abahri",
+    "last_name": "Alfred",
+    "registration_date": {
+      "$date": "2020-10-22T00:00:00Z"
+    },
+    "birth_date": {
+      "$date": "1922-09-18T00:00:00Z"
+    },
+    "visits": 103,
+    "top_tags": {
+      "hot": 6,
+      "of": 8,
+      "beginning": 2
+    },
+    "karma": 85
+  }
+]
+
+Ответ:
+// Создание композитного индекса
+db.users.createIndex({ first_name: 1, last_name: 1 });
+
+// Проверка использования индекса
+const explainResult = db.users.find({ first_name: "Vinnie", last_name: "Janiya" }).explain("executionStats");
+
+// Вывод результата объяснения запроса
+printjson(explainResult);
+// Либо вот так
+print("Используемый индекс:", explainResult.executionStats.executionStages.inputStage.indexName);
+
+
+----------------------------------------------------------
+> db.users.createIndex({ first_name: 1, last_name: 1 });
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+> const explainResult = db.users.find({ first_name: "Vinnie", last_name: "Janiya" }).explain("executionStats");
+> print("Используемый индекс:", explainResult.executionStats.executionStages.inputStage.indexName);
+Используемый индекс: first_name_1_last_name_1
+> printjson(explainResult);
+{
+        "queryPlanner" : {
+                "plannerVersion" : 1,
+                "namespace" : "skdb.users",
+                "indexFilterSet" : false,
+                "parsedQuery" : {
+                        "$and" : [
+                                {
+                                        "first_name" : {
+                                                "$eq" : "Vinnie"
+                                        }
+                                },
+                                {
+                                        "last_name" : {
+                                                "$eq" : "Janiya"
+                                        }
+                                }
+                        ]
+                },
+                "winningPlan" : {
+                        "stage" : "FETCH",
+                        "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "keyPattern" : {
+                                        "first_name" : 1,
+                                        "last_name" : 1
+                                },
+                                "indexName" : "first_name_1_last_name_1",
+                                "isMultiKey" : false,
+                                "multiKeyPaths" : {
+                                        "first_name" : [ ],
+                                        "last_name" : [ ]
+                                },
+                                "isUnique" : false,
+                                "isSparse" : false,
+                                "isPartial" : false,
+                                "indexVersion" : 2,
+                                "direction" : "forward",
+                                "indexBounds" : {
+                                        "first_name" : [
+                                                "[\"Vinnie\", \"Vinnie\"]"
+                                        ],
+                                        "last_name" : [
+                                                "[\"Janiya\", \"Janiya\"]"
+                                        ]
+                                }
+                        }
+                },
+                "rejectedPlans" : [ ]
+        },
+        "executionStats" : {
+                "executionSuccess" : true,
+                "nReturned" : 1,
+                "executionTimeMillis" : 0,
+                "totalKeysExamined" : 1,
+                "totalDocsExamined" : 1,
+                "executionStages" : {
+                        "stage" : "FETCH",
+                        "nReturned" : 1,
+                        "executionTimeMillisEstimate" : 0,
+                        "works" : 2,
+                        "advanced" : 1,
+                        "needTime" : 0,
+                        "needYield" : 0,
+                        "saveState" : 0,
+                        "restoreState" : 0,
+                        "isEOF" : 1,
+                        "docsExamined" : 1,
+                        "alreadyHasObj" : 0,
+                        "inputStage" : {
+                                "stage" : "IXSCAN",
+                                "nReturned" : 1,
+                                "executionTimeMillisEstimate" : 0,
+                                "works" : 2,
+                                "advanced" : 1,
+                                "needTime" : 0,
+                                "needYield" : 0,
+                                "saveState" : 0,
+                                "restoreState" : 0,
+                                "isEOF" : 1,
+                                "keyPattern" : {
+                                        "first_name" : 1,
+                                        "last_name" : 1
+                                },
+                                "indexName" : "first_name_1_last_name_1",
+                                "isMultiKey" : false,
+                                "multiKeyPaths" : {
+                                        "first_name" : [ ],
+                                        "last_name" : [ ]
+                                },
+                                "isUnique" : false,
+                                "isSparse" : false,
+                                "isPartial" : false,
+                                "indexVersion" : 2,
+                                "direction" : "forward",
+                                "indexBounds" : {
+                                        "first_name" : [
+                                                "[\"Vinnie\", \"Vinnie\"]"
+                                        ],
+                                        "last_name" : [
+                                                "[\"Janiya\", \"Janiya\"]"
+                                        ]
+                                },
+                                "keysExamined" : 1,
+                                "seeks" : 1,
+                                "dupsTested" : 0,
+                                "dupsDropped" : 0
+                        }
+                }
+        },
+        "serverInfo" : {
+                "host" : "98d685cc84ff",
+                "port" : 27017,
+                "version" : "4.4.29",
+                "gitVersion" : "f4dda329a99811c707eb06d05ad023599f9be263"
+        },
+        "ok" : 1
+}
+>
+
+------------------------------------------------------
+> db.users.createIndex({ "first_name": 1, "last_name": 1}, {unique: true});
+{
+        "ok" : 0,
+        "errmsg" : "Index with name: first_name_1_last_name_1 already exists with different options",
+        "code" : 85,
+        "codeName" : "IndexOptionsConflict"
+}
+
+
+
+------------------------------------------------------------
+Задание 4
+
+Цель практической работы:
+Научиться писать аналитические запросы в MongoDB.
+
+Что нужно сделать:
+Для коллекции users.
+Посчитайте сумму кармы(karma) по первым буквам имён пользователей(first_name) для тех пользователей(users), у которых больше 300 визитов(visits).
+Советы и указания
+Для выбора первой буквы имени используйте ключевое слово substr.- для старых версий MongoDB и для новых substrCP
+
+Ответ:
+db.users.aggregate([
+  {
+    $match: { visits: { $gt: 300 } } // Фильтрация по количеству визитов
+  },
+  {
+    $project: {
+      first_letter: { $substrCP: ["$first_name", 0, 1] }, // Получение первой буквы имени
+      karma: 1
+    }
+  },
+  {
+    $group: {
+      _id: "$first_letter", // Группировка по первой букве
+      total_karma: { $sum: "$karma" } // Сумма кармы по каждой группе
+    }
+  }
+]);
+
+
+-----------------------------------------------------------------
+> db
+skdb
+> db.users.aggregate([
+...   {
+...     $match: { visits: { $gt: 300 } }
+...   },
+...   {
+...     $project: {
+...       first_letter: { $substrCP: ["$first_name", 0, 1] },
+...       karma: 1
+...     }
+...   },
+...   {
+...     $group: {
+...       _id: "$first_letter",
+...       total_karma: { $sum: "$karma" }
+...     }
+...   }
+... ]);
+{ "_id" : "V", "total_karma" : -43 }
+{ "_id" : "L", "total_karma" : 243 }
+{ "_id" : "M", "total_karma" : 516 }
+{ "_id" : "R", "total_karma" : 53 }
+{ "_id" : "J", "total_karma" : 478 }
+{ "_id" : "Z", "total_karma" : -82 }
+{ "_id" : "G", "total_karma" : 199 }
+{ "_id" : "H", "total_karma" : 79 }
+{ "_id" : "D", "total_karma" : -39 }
+{ "_id" : "A", "total_karma" : -28 }
+{ "_id" : "O", "total_karma" : 71 }
+{ "_id" : "P", "total_karma" : 94 }
+{ "_id" : "K", "total_karma" : 153 }
+{ "_id" : "C", "total_karma" : 176 }
+{ "_id" : "S", "total_karma" : 296 }
+{ "_id" : "E", "total_karma" : 120 }
+{ "_id" : "B", "total_karma" : 323 }
+{ "_id" : "T", "total_karma" : -68 }
+------------------------------------------------------------------
+
+
+Задание 5
+
+Цель практической работы:
+Научиться писать хранимые процедуры в MongoDB.
+
+Что нужно сделать:
+Создайте хранимую функцию shuffle, которая принимает один параметр — строку и возвращает строку со случайно переставленными символами.
+
+
+Советы и указания:
+Используйте встроенный в JavaScript метод Math.random() для сортировки символов в строке.
+
+Ответ:
+db.system.js.save({
+  _id: "shuffle1",
+  value: function(str) {
+    // Преобразуем строку в массив символов
+    let arr = str.split('');
+    
+    // Сортируем массив случайным образом с помощью Math.random()
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+    
+    // Преобразуем массив обратно в строку
+    return arr.join('');
+  }
+});
+
+const shuffledString = db.eval("shuffle1('your_string_here')");
+print(shuffledString);
+
+const shuffledString = db.eval("shuffle1('Hello_MongoDB')");
+print(shuffledString);
+-----------------------------------------------------------------------------------
+
+Ответ:
+db.system.js.updateOne(
+  { _id: "shuffle" },
+  {
+    $set: {
+      value: function(str) {
+        // Преобразуем строку в массив символов
+        let arr = str.split('');
+        
+        // Сортируем массив случайным образом с помощью Math.random()
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const temp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = temp;
+        }
+        
+        // Преобразуем массив обратно в строку
+        return arr.join('');
+      }
+    }
+  },
+  { upsert: true }
+);
+--------------------------------------------------------------------------------------------
+Ответ:
+db.system.js.updateOne(
+  { _id: "shuffle" },
+  {
+    $set: {
+      value: function(str) {
+        let arr = str.split('');
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const temp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = temp;
+        }
+        return arr.join('');
+      }
+    }
+  },
+  { upsert: true }
+);
+
+Проверка:
+db.system.js.find({ _id: "shuffle" }).pretty();
+const shuffleCode = db.system.js.findOne({ _id: "shuffle" }).value;
+const shuffle = eval('(' + shuffleCode.code + ')');
+print(shuffle("mongodb"));
+------------------------------------------------------------------------------
+
+1) > db.system.js.updateOne(
+...   { _id: "shuffle" },
+...   {
+...     $set: {
+...       value: function(str) {
+...         let arr = str.split('');
+...         for (let i = arr.length - 1; i > 0; i--) {
+...           const j = Math.floor(Math.random() * (i + 1));
+...           const temp = arr[i];
+...           arr[i] = arr[j];
+...           arr[j] = temp;
+...         }
+...         return arr.join('');
+...       }
+...     }
+...   },
+...   { upsert: true }
+... );
+{
+        "acknowledged" : true,
+        "matchedCount" : 0,
+        "modifiedCount" : 0,
+        "upsertedId" : "shuffle"
+}
+2) > db.system.js.find({ _id: "shuffle" }).pretty();
+{
+        "_id" : "shuffle",
+        "value" : {
+                "code" : "function(str) {\n        let arr = str.split('');\n        for (let i = arr.length - 1; i > 0; i--) {\n          const j = Math.floor(Math.random() * (i + 1));\n          const temp = arr[i];\n          arr[i] = arr[j];\n          arr[j] = temp;\n        }\n        return arr.join('');\n      }"
+        }
+}
+>
+3) > const shuffleCode = db.system.js.findOne({ _id: "shuffle" }).value;
+4) > const shuffle = eval('(' + shuffleCode.code + ')');
+5) > print(shuffle("mongodb"));
+oogmndb
+6) > print(shuffle("Hello_MongoDB"));
+nHlM_ooDoglBe
+>
+
+> const shuffledString = db.eval("shuffle('Hello_MongoDB')");
+uncaught exception: SyntaxError: redeclaration of const shuffledString :
+@(shell):1:1
+> print(db.eval("shuffle('Hello_MongoDB')"))
+WARNING: db.eval is deprecated
+uncaught exception: Error: {
+        "ok" : 0,
+        "errmsg" : "no such command: '$eval'",
+        "code" : 59,
+        "codeName" : "CommandNotFound"
+} :
+_getErrorWithCode@src/mongo/shell/utils.js:25:13
+DB.prototype.eval@src/mongo/shell/db.js:693:15
+@(shell):1:7
+------------------------------------------------------------------------------------
+> db.system.js.updateOne(
+...   { _id: "shuffle" },
+...   {
+...     $set: {
+...       value: function(str) {
+...         let arr = str.split('');
+...         for (let i = arr.length - 1; i > 0; i--) {
+...           const j = Math.floor(Math.random() * (i + 1));
+...           const temp = arr[i];
+...           arr[i] = arr[j];
+...           arr[j] = temp;
+...         }
+...         return arr.join('');
+...       }
+...     }
+...   },
+...   { upsert: true }
+... );
+{
+        "acknowledged" : true,
+        "matchedCount" : 0,
+        "modifiedCount" : 0,
+        "upsertedId" : "shuffle"
+}
+> db.system.js.find({ _id: "shuffle" }).pretty();
+{
+        "_id" : "shuffle",
+        "value" : {
+                "code" : "function(str) {\n        let arr = str.split('');\n        for (let i = arr.length - 1; i > 0; i--) {\n          const j = Math.floor(Math.random() * (i + 1));\n          const temp = arr[i];\n          arr[i] = arr[j];\n          arr[j] = temp;\n        }\n        return arr.join('');\n      }"
+        }
+}
+> const shuffleCode = db.system.js.findOne({ _id: "shuffle" }).value;
+> const shuffle = eval('(' + shuffleCode.code + ')');
+> print(shuffle("mongodb"));
+oogmndb
+> print(shuffle("Hello_MongoDB"));
+nHlM_ooDoglBe
+>
+-------------------------------------------------------------------------------
+чтобы не парятся написать на js и все тут, проще и легче :))))
+
+function shuffle(str) {
+  let arr = str.split('');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.join('');
+}
+
+shuffle("mongodb"); // => случайная перестановка
+
+
+
+
+
+Необходимые материалы, которые могут вам понадобиться при выполнении домашней работы:
+https://github.com/qs/skillbox-database-course/

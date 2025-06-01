@@ -1,0 +1,77 @@
+Типы данных: string(UTF-8)
+1) > show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+skdb    0.000GB
+2) > use skdb
+switched to db skdb
+3) > show collections
+posts
+users
+4) db.misc.insert({"textValue": "simple text на любом языке с поддержкой utf-8 😊"});  😄😄
+WriteResult({ "nInserted" : 1 })
+5) > db.misc.find();
+{ "_id" : ObjectId("683b8ecac147fab13d11a92b"), "textValue" : "simple text на любом языке с поддержкой utf-8 😊 " }
+цифры: int- 32bit, long- 64bit,double - числа с плавующей точкой
+6) > db.misc.insertOne({doubleValue: 9.99, integervalue: 9});
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("683b909ec147fab13d11a92c")
+}
+7) > db.misc.find(ObjectId("683b909ec147fab13d11a92c"));
+{ "_id" : ObjectId("683b909ec147fab13d11a92c"), "doubleValue" : 9.99, "integervalue" : 9 }
+date-ISO-8601 и timestamp
+
+8) > db.misc.insertOne({nowTs: new Timestamp(), created: ISODate("2025-05-31T00:00:00Z")});
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("683b9317c147fab13d11a92d")
+}
+
+9) > db.misc.find(ObjectId("683b9317c147fab13d11a92d"));
+{ "_id" : ObjectId("683b9317c147fab13d11a92d"), "nowTs" : Timestamp(1748734743, 1), "created" : ISODate("2025-05-31T00:00:00Z") }
+10) > db.misc.find({"_id": ObjectId("683b9317c147fab13d11a92d")});
+{ "_id" : ObjectId("683b9317c147fab13d11a92d"), "nowTs" : Timestamp(1748734743, 1), "created" : ISODate("2025-05-31T00:00:00Z") }
+Массив
+11) > db.misc.insertMany([{tags: ["monoDB", "mySQL"]}, {tags: ["mongoDB", "postgeSQL"]}]);
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("683b9741c147fab13d11a92e"),
+                ObjectId("683b9741c147fab13d11a92f")
+        ]
+}
+
+12) > db.misc.find({ tags: "mySQL"});
+{ "_id" : ObjectId("683b9741c147fab13d11a92e"), "tags" : [ "monoDB", "mySQL" ] }
+
+13) > db.misc.find({ tags: ["monoDB","mySQL"]});
+{ "_id" : ObjectId("683b9741c147fab13d11a92e"), "tags" : [ "monoDB", "mySQL" ] }
+> db.misc.find({ tags: ["mySQL", "monoDB"]});
+
+14)> db.misc.find({ tags: ["mySQL"]});
+
+15) > db.misc.find({   "_id": { $in: [ ObjectId("683b9741c147fab13d11a92e"), ObjectId("683b9741c147fab13d11a92f") ]} });
+{ "_id" : ObjectId("683b9741c147fab13d11a92e"), "tags" : [ "monoDB", "mySQL" ] }
+{ "_id" : ObjectId("683b9741c147fab13d11a92f"), "tags" : [ "mongoDB", "postgeSQL" ] }
+
+16) > db.misc.insert({"message": "text", "author": DBRef("misc", ObjectId("683b9741c147fab13d11a92f"))});
+WriteResult({ "nInserted" : 1 })
+17) > db.misc.find({"message": "text"});
+{ "_id" : ObjectId("683b9dc4c147fab13d11a930"), "message" : "text", "author" : DBRef("misc", ObjectId("683b9741c147fab13d11a92f")) }
+
+18) > db.articles.insert({"title": "Good news everyone", "text": "Everyone is ok", "comment": [{"_id": new ObjectId(), "author": "byuko@example.com", "message": "good thinks!"}, {"_id": new ObjectId(), "author": "mmickey@example.info", "message": "thank you"}]});
+WriteResult({ "nInserted" : 1 })
+19) > db.articles.find();
+{ "_id" : ObjectId("683b9fbfc147fab13d11a933"), "title" : "Good news everyone", "text" : "Everyone is ok", "comment" : [ { "_id" : ObjectId("683b9fbfc147fab13d11a931"), "author" : "byuko@example.com", "message" : "good thinks!" }, { "_id" : ObjectId("683b9fbfc147fab13d11a932"), "author" : "mmickey@example.info", "message" : "thank you" } ] }
+>
+20) > db.articles.find({},{"comment": 0});
+{ "_id" : ObjectId("683b9fbfc147fab13d11a933"), "title" : "Good news everyone", "text" : "Everyone is ok" }
+21) > db.articles.find({"text": /ok/},{"comment": 0});
+{ "_id" : ObjectId("683b9fbfc147fab13d11a933"), "title" : "Good news everyone", "text" : "Everyone is ok" }
+>
+22) > db.articles.find({"comment": {"$elemMatch": {"_id": ObjectId("683b9fbfc147fab13d11a931")}}},{"comment.$": 1});
+{ "_id" : ObjectId("683b9fbfc147fab13d11a933"), "comment" : [ { "_id" : ObjectId("683b9fbfc147fab13d11a931"), "author" : "byuko@example.com", "message" : "good thinks!" } ] }
+>
+23) 
